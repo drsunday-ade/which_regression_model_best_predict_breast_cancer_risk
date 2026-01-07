@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+title: "Which Regression Model Best Predicts Breast Cancer Risk? A Reproducible Comparison of Penalized Logistic Regression Methods"
+authors:
+  - family-names: "Adetunji"
+    given-names: "Sunday A."
+    email: "adetunjs@oregonstate.edu"
+    affiliation: "Department of Biostatistics, Oregon State University"
+    orcid: "https://orcid.org/0000-0001-9321-9957"
+abstract: >
+  Reproducible pipeline comparing penalized logistic regression strategies (ridge, lasso, elastic net)
+  with post-hoc probability calibration and feature-selection stability analysis on the Wisconsin
+  Diagnostic Breast Cancer (WDBC) dataset. Includes code, out-of-fold predictions, fold-level metrics,
+  manuscript-ready figures/tables, and run manifests for full end-to-end reproducibility.
+keywords:
+  - breast cancer
+  - risk prediction
+  - penalized logistic regression
+  - ridge regression
+  - lasso
+  - elastic net
+  - calibration
+  - Platt scaling
+  - isotonic regression
+  - nested cross-validation
+  - stability selection
+  - reproducible research
+  - biostatistics
+  - data science
+repository-code: "https://github.com/drsunday-ade/which_regression_model_best_predict_breast_cancer_risk"
+url: "https://github.com/drsunday-ade/which_regression_model_best_predict_breast_cancer_risk"
+date-released: "2026-01-07"
+preferred-citation:
+  type: software
+  title: "Which Regression Model Best Predicts Breast Cancer Risk? A Reproducible Comparison of Penalized Logistic Regression Methods"
+  authors:
+    - family-names: "Adetunji"
+      given-names: "Sunday A."
+      orcid: "https://orcid.org/0000-0001-9321-9957"
+  year: 2026
+  url: "https://github.com/drsunday-ade/which_regression_model_best_predict_breast_cancer_risk"

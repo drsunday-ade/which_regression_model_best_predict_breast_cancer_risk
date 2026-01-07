@@ -1,0 +1,33 @@
+WDBC JDS pipeline started: 2026-01-06 18:50:29 PST 
+DATA_DIR: /Users/drsunjava/Desktop/2. Medical Boards Stack/Abstracts/JDS/study2_breatca 
+OUT_DIR:  /Users/drsunjava/Desktop/2. Medical Boards Stack/Abstracts/JDS/study2_breatca/outputs_wdbc_jds 
+LOG_FILE: /Users/drsunjava/Desktop/2. Medical Boards Stack/Abstracts/JDS/study2_breatca/outputs_wdbc_jds/PIPELINE_LOG_20260106_185029.txt 
+wdbc.names checks: Diagnosis mentioned = TRUE; mentions 30 features = TRUE 
+CONFIG: OUTER_FOLDS=10 N_REPEATS=10 INNER_FOLDS=5 CALIB_CV=3 BOOT_B=200 PI_THR=0.75 ONE_SE_RULE=TRUE SEED=20260106 
+Starting repeated outer CV: 10-fold x 10 repeats (100 splits) 
+Progress: completed split_id=5 / 100 
+Progress: completed split_id=10 / 100 
+Progress: completed split_id=15 / 100 
+Progress: completed split_id=20 / 100 
+Progress: completed split_id=25 / 100 
+Progress: completed split_id=30 / 100 
+Progress: completed split_id=35 / 100 
+Progress: completed split_id=40 / 100 
+Progress: completed split_id=45 / 100 
+Progress: completed split_id=50 / 100 
+Progress: completed split_id=55 / 100 
+Progress: completed split_id=60 / 100 
+Progress: completed split_id=65 / 100 
+Progress: completed split_id=70 / 100 
+Progress: completed split_id=75 / 100 
+Progress: completed split_id=80 / 100 
+Progress: completed split_id=85 / 100 
+Progress: completed split_id=90 / 100 
+Progress: completed split_id=95 / 100 
+Progress: completed split_id=100 / 100 
+Selected BEST_STRATEGY: enet_sigmoid 
+WARNING: plot failed [figure_01_roc]: The returned data frame cannot contain the original grouping variables: strategy_label. 
+WARNING: plot failed [figure_02_pr]: The returned data frame cannot contain the original grouping variables: strategy_label. 
+WARNING: plot failed [figure_03_calibration]: The returned data frame cannot contain the original grouping variables: strategy_label. 
+Pipeline completed successfully. 
+See RUN_SUMMARY.txt and PIPELINE_LOG for details. 

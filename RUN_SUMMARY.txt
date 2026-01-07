@@ -1,0 +1,31 @@
+RUN SUMMARY — WDBC JDS Pipeline (R-ONLY)
+Generated: 2026-01-06 18:54:57 PST
+DATA_DIR: /Users/drsunjava/Desktop/2. Medical Boards Stack/Abstracts/JDS/study2_breatca
+OUT_DIR:  /Users/drsunjava/Desktop/2. Medical Boards Stack/Abstracts/JDS/study2_breatca/outputs_wdbc_jds
+LOG_FILE: /Users/drsunjava/Desktop/2. Medical Boards Stack/Abstracts/JDS/study2_breatca/outputs_wdbc_jds/PIPELINE_LOG_20260106_185029.txt
+
+BEST_STRATEGY: enet_sigmoid
+
+Key outputs:
+  Figures: /Users/drsunjava/Desktop/2. Medical Boards Stack/Abstracts/JDS/study2_breatca/outputs_wdbc_jds/figures
+    figure_01_roc.png
+    figure_02_pr.png
+    figure_03_calibration.png
+    figure_04_decision_curve.png
+    figure_05_stability_heatmap.png
+
+  Tables:  /Users/drsunjava/Desktop/2. Medical Boards Stack/Abstracts/JDS/study2_breatca/outputs_wdbc_jds/tables
+    table_01_data_summary.(csv/html)
+    table_02_feature_summary.(csv/html)
+    table_03_performance_summary.(csv/html)
+    table_04_stability_summary.(csv/html) [if sparse models]
+    table_05_pairwise_vs_best.(csv/html)
+    table_06_feature_stability_profile.(csv/html)
+
+  Aux:     /Users/drsunjava/Desktop/2. Medical Boards Stack/Abstracts/JDS/study2_breatca/outputs_wdbc_jds/aux
+    oof_predictions.csv
+    fold_metrics.csv
+    stability_selection.csv
+    run_manifest.json
+    wdbc_names_excerpt.txt
+

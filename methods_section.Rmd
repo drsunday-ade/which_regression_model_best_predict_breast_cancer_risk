@@ -1,0 +1,101 @@
+---
+title: "Methods"
+output:
+  word_document: default
+  html_document: default
+---
+
+## Methods
+
+### Data source, study design, and outcome definition
+
+We conducted a fully reproducible secondary analysis of the Wisconsin Diagnostic Breast Cancer (WDBC) dataset from the UCI Machine Learning Repository. The dataset comprises **569** breast-mass observations, each labeled as **malignant (M)** or **benign (B)** based on clinical diagnosis, and accompanied by quantitative features derived from digitized fine-needle aspirate (FNA) images. For modeling, the outcome was encoded as \(Y=1\) for malignant and \(Y=0\) for benign. The dataset contains an identifier (ID), the diagnosis label, and **30 continuous predictors**; the ID field was excluded from all analyses. The predictors are fully observed (no missing values), enabling complete-case analysis without imputation.
+
+The analysis objective was methodological: to compare penalized logistic regression strategies—**ridge (L2)**, **lasso (L1)**, and **elastic net (L1+L2)**—each evaluated under **three probability-output variants** (raw, sigmoid-calibrated, isotonic-calibrated), and to determine which strategy best balances **discrimination**, **calibration/probability accuracy**, and (for sparse models) **feature-selection stability**, under rigorous resampling.
+
+### Predictors and feature structure
+
+The 30 predictors arise from 10 base nuclear characteristics (radius, texture, perimeter, area, smoothness, compactness, concavity, concave points, symmetry, fractal dimension), each summarized in three ways: mean, standard error (SE), and “worst” (mean of the three largest values). This construction induces substantial collinearity and grouped correlation among predictors, which motivates shrinkage/selection via penalization and explicit stability evaluation (Tibshirani, 1996; Zou & Hastie, 2005).
+
+### Modeling framework: penalized logistic regression
+
+Let \(x_i \in \mathbb{R}^{p}\) denote the predictor vector for observation \(i\) with \(p=30\), and let \(p_i = \Pr(Y_i=1 \mid x_i)\). Logistic regression specifies
+
+$$
+\text{logit}(p_i) = \beta_0 + x_i^\top \beta, \quad
+p_i = \frac{1}{1+\exp\{-(\beta_0 + x_i^\top \beta)\}}.
+$$
+
+Penalized estimators were obtained by minimizing the penalized negative log-likelihood
+
+$$
+\hat{\beta}=\arg\min_{\beta}\left\{
+-\frac{1}{n}\sum_{i=1}^{n}\left[y_i\log(p_i) + (1-y_i)\log(1-p_i)\right]
++ \lambda\left[\frac{1-\alpha}{2}\|\beta\|_2^2 + \alpha\|\beta\|_1\right]
+\right\},
+$$
+
+where \(\lambda \ge 0\) controls overall shrinkage and \(\alpha\in[0,1]\) controls the mixture of L2 and L1 penalties. Ridge corresponds to \(\alpha=0\), lasso to \(\alpha=1\), and elastic net to \(\alpha\in(0,1)\) (Tibshirani, 1996; Zou & Hastie, 2005).
+
+### Preprocessing and leakage control
+
+All model fitting was executed strictly within resampling partitions to prevent information leakage. Continuous predictors were standardized within each training fit (as implemented by the modeling engine), and the learned scaling parameters were applied to the corresponding held-out data during prediction. No feature engineering beyond standardization was applied. Predicted probabilities were numerically clipped to \([10^{-6}, 1-10^{-6}]\) for stable computation of log loss and logit-based calibration diagnostics.
+
+### Hyperparameter tuning
+
+Hyperparameters were selected using **inner cross-validation within each outer training fold**. For ridge and lasso, the regularization path over \(\lambda\) was tuned using cross-validated binomial deviance (log loss). For elastic net, both \(\alpha\) and \(\lambda\) were tuned: \(\alpha\) was searched over a prespecified grid \(\{0.10, 0.30, 0.50, 0.70, 0.90\}\), and \(\lambda\) was tuned along the regularization path within each \(\alpha\). In all cases, the selected \(\lambda\) followed the **one-standard-error rule** (choosing \(\lambda_{1se}\)) to favor more regularized, typically more stable solutions when performance was statistically indistinguishable from the minimum-deviance choice.
+
+### Validation design: repeated nested stratified cross-validation
+
+Generalization performance was estimated using **repeated nested stratified cross-validation**. The outer loop used **10-fold stratified CV repeated 10 times** (total **100** outer test evaluations per strategy), ensuring each repeat produced out-of-fold predictions for all individuals. Within each outer training partition, an **inner 5-fold stratified CV** performed hyperparameter selection for the base penalized model. This design yields performance estimates that reflect the full tuning procedure rather than optimistic single-split evaluation.
+
+In rare cases where a particular outer test fold contained only one class, discrimination metrics requiring both classes (ROC-AUC and PR-AUC) were treated as undefined for that split and recorded as missing for those metrics only; proper scoring rules (log loss, Brier score) remained computable.
+
+### Post-hoc probability calibration
+
+To evaluate whether post-hoc calibration improves probability quality, we applied two standard calibration procedures, each trained **only within outer training data** and then applied to the untouched outer test fold:
+
+1. **Sigmoid calibration (Platt scaling):** a logistic calibration model mapping the model’s raw predicted probabilities \(p\) (on the logit scale) to calibrated probabilities (Platt, 1999).  
+2. **Isotonic regression calibration:** a nonparametric monotone mapping from predicted probabilities to calibrated probabilities (Zadrozny & Elkan, 2002).
+
+To prevent calibration leakage, calibration models were fit using **3-fold stratified cross-fitting within the outer training set**: (i) the tuned penalized model was refit within calibration folds to generate out-of-fold predictions for the training data; (ii) the calibrator was fit on these out-of-fold predictions and true outcomes; and (iii) the resulting calibrator was applied to raw predictions in the corresponding outer test fold.
+
+Accordingly, each penalization family (ridge, lasso, elastic net) produced three evaluated probability strategies: **raw**, **sigmoid-calibrated**, and **isotonic-calibrated**.
+
+### Performance metrics
+
+Performance was assessed along three complementary axes: discrimination, calibration/probability accuracy, and (for sparse models) feature-selection stability.
+
+**Discrimination.** We computed ROC-AUC and PR-AUC using out-of-fold test predictions generated by the outer loop. ROC-AUC summarizes ranking performance across thresholds, while PR-AUC emphasizes performance for the malignant class and is sensitive to prevalence (Davis & Goadrich, 2006). For visualization, ROC curves were constructed from pooled out-of-fold predictions using ROC coordinate extraction; precision–recall curves were constructed using a version-agnostic manual PR-curve procedure based on threshold ordering of predicted probabilities.
+
+**Calibration and probability accuracy.** We evaluated probability quality using strictly proper scoring rules and calibration diagnostics. Log loss (cross-entropy) was computed as
+
+$$
+-\frac{1}{n}\sum_{i=1}^{n}\left[y_i\log(p_i) + (1-y_i)\log(1-p_i)\right],
+$$
+
+and the Brier score as \(\frac{1}{n}\sum_{i=1}^{n}(y_i-p_i)^2\) (Brier, 1950). Calibration was additionally summarized by (i) **calibration intercept and slope**, obtained by regressing \(Y\) on \(\text{logit}(p)\) within each outer split (ideal intercept \(0\), slope \(1\)), and (ii) **expected calibration error (ECE)** computed with **10 bins** formed from predicted-probability quantiles within each split, using bin-size–weighted absolute differences between observed and predicted risk.
+
+### Stability selection and feature-selection stability (sparse families)
+
+For lasso and elastic net, we quantified feature-selection stability within each outer training fold using bootstrap resampling (Meinshausen & Bühlmann, 2010). After selecting \((\alpha,\lambda)\) via inner CV for that outer training fold, we generated **200 bootstrap resamples** of the training data and refit the penalized model at the fixed tuned hyperparameters. A feature was counted as “selected” if its fitted coefficient was nonzero, yielding a selection frequency \(\hat{\pi}_j \in [0,1]\) for each feature \(j\). Features were designated “stable” if \(\hat{\pi}_j \ge 0.75\). To summarize stability at the model level, we computed (i) the mean number of selected features across bootstraps, and (ii) the mean pairwise **Jaccard similarity** between selected-feature sets (computed on a computationally tractable subset of bootstrap replicates), where the Jaccard similarity for two sets \(A,B\) is \(|A\cap B|/|A\cup B|\).
+
+Ridge regression does not produce exact zeros; therefore, stability selection was evaluated only for the sparse families (lasso and elastic net), consistent with the interpretability objective.
+
+### Decision curve analysis
+
+To assess potential clinical utility across decision thresholds, we performed decision curve analysis using **net benefit** (Vickers & Elkin, 2006). For a threshold \(t\), predicted positives were defined by \(p_i \ge t\), and net benefit was computed as
+
+$$
+\text{NB}(t) = \frac{\text{TP}(t)}{n} - \frac{\text{FP}(t)}{n}\cdot \frac{t}{1-t}.
+$$
+
+Net benefit curves were evaluated over thresholds \(t \in [0.01, 0.80]\) in increments of 0.01, and compared with “treat none” and “treat all” reference policies.
+
+### Strategy selection: prespecified joint decision rule
+
+Because the scientific target was joint performance (not discrimination alone), we prespecified a hierarchical selection rule applied to the outer-CV summaries. First, we identified the strategy with the highest mean ROC-AUC across outer splits and formed a candidate set consisting of strategies whose mean ROC-AUC was within **one standard error** of the best. Second, within that candidate set, we prioritized probability quality by selecting the strategy minimizing mean log loss, with further ordering by ECE and Brier score (lower is better). Third, when stability information was available (sparse families), we favored strategies with higher mean Jaccard similarity and, secondarily, fewer selected features, reflecting reproducibility and parsimony.
+
+### Software and reproducibility
+
+All analyses were implemented in a single, end-to-end **R-only** pipeline that (i) executes data acquisition/checks, (ii) performs repeated nested cross-validation with fixed random seeds, (iii) fits and calibrates models strictly within resampling partitions, and (iv) produces publication-ready tables and figures along with machine-readable artifacts (including run configuration and session/package version capture) sufficient to reproduce the complete computational workflow.
